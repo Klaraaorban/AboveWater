@@ -41,7 +41,14 @@ function loadObject(
       }
       const pts = child as THREE.Points
       if ((pts as any).isPoints && pts.geometry) {
-        group.add(pts.clone())
+        const clone = pts.clone()
+        clone.material = new THREE.PointsMaterial({
+          size: pointSize,
+          sizeAttenuation: true,
+          vertexColors: false,
+          color: c,
+        })
+        group.add(clone)
       }
     })
     if (group.children.length === 0 && root.children.length > 0) group.add(root)
