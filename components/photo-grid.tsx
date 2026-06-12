@@ -1,19 +1,16 @@
 'use client'
 
-const SAMPLES = [
-  '/assets/survey/sample-1.png',
-  '/assets/survey/sample-2.png',
-  '/assets/survey/sample-3.png',
+const FRAMES = [
+  { src: '/assets/survey/frame_00030.jpg', tag: 'FRAME_00030' },
+  { src: '/assets/survey/frame_00045.jpg', tag: 'FRAME_00045' },
+  { src: '/assets/survey/frame_00050.jpg', tag: 'FRAME_00050' },
+  { src: '/assets/survey/frame_00061.jpg', tag: 'FRAME_00061' },
+  { src: '/assets/survey/frame_00067.jpg', tag: 'FRAME_00067' },
+  { src: '/assets/survey/frame_00080.jpg', tag: 'FRAME_00080' },
+  { src: '/assets/survey/frame_00099.jpg', tag: 'FRAME_00099' },
+  { src: '/assets/survey/frame_00109.jpg', tag: 'FRAME_00109' },
+  { src: '/assets/survey/frame_00124.jpg', tag: 'FRAME_00124' },
 ]
-
-const FRAMES = Array.from({ length: 9 }, (_, i) => {
-  const n = String(i + 1).padStart(2, '0')
-  return {
-    src: `/assets/survey/frame_${n}.jpg`,
-    fallback: SAMPLES[i % SAMPLES.length],
-    tag: `FRAME_${n}`,
-  }
-})
 
 export function PhotoGrid() {
   return (
@@ -40,12 +37,8 @@ export function PhotoGrid() {
             className="group relative aspect-[4/3] overflow-hidden rounded border border-line bg-background"
           >
             <img
-              src={frame.src || "/placeholder.svg"}
+              src={frame.src}
               alt={`Survey ${frame.tag}`}
-              onError={(e) => {
-                const img = e.currentTarget
-                if (img.src.indexOf(frame.fallback) === -1) img.src = frame.fallback
-              }}
               className="h-full w-full object-cover brightness-90 saturate-[0.85] transition-all duration-500 group-hover:scale-105 group-hover:brightness-100 group-hover:saturate-100"
             />
             <figcaption className="absolute bottom-2.5 left-2.5 rounded bg-background/75 px-2 py-0.5 font-mono text-[0.7rem] tracking-wide text-foreground opacity-0 transition-opacity group-hover:opacity-100">
