@@ -1,4 +1,14 @@
-export function Hero() {
+'use client'
+
+type Dataset = 'simulated' | 'real'
+
+export function Hero({
+  dataset,
+  onDatasetChange,
+}: {
+  dataset: Dataset
+  onDatasetChange: (d: Dataset) => void
+}) {
   const stats = [
     { num: '2', label: 'Surface Datasets' },
     { num: '3', label: 'Reconstruction Methods' },
@@ -53,17 +63,28 @@ export function Hero() {
             </div>
           ))}
         </div>
-      </div>
 
-      {/* <div className="absolute bottom-12 left-[8vw] z-10 flex items-center gap-3 font-mono text-[0.72rem] uppercase tracking-wide text-muted-foreground">
-        <span>Scroll to explore</span>
-        <span className="relative h-px w-10 overflow-hidden bg-muted-foreground/40">
-          <span
-            className="absolute left-0 h-px w-10 bg-ice"
-            style={{ animation: 'travel 2.2s ease-in-out infinite' }}
-          />
-        </span>
-      </div> */}
+        <div className="mt-12 flex items-center gap-4">
+          <span className="font-mono text-[0.72rem] uppercase tracking-[0.1em] text-muted-foreground">
+            Dataset
+          </span>
+          <div className="flex rounded-lg border border-line bg-panel p-1 gap-1">
+            {(['simulated', 'real'] as const).map((d) => (
+              <button
+                key={d}
+                onClick={() => onDatasetChange(d)}
+                className={`font-mono text-[0.72rem] uppercase tracking-[0.1em] px-4 py-1.5 rounded-md transition-all ${
+                  dataset === d
+                    ? 'bg-ice text-background shadow-[0_0_12px_var(--ice)]'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </section>
   )
 }

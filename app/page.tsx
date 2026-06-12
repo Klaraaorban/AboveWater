@@ -1,14 +1,21 @@
+'use client'
+
+import { useState } from 'react'
 import { Hero } from '@/components/hero'
 import { PhotoGrid } from '@/components/photo-grid'
 import { PipelineSection } from '@/components/pipeline-section'
 import { ResultsSection } from '@/components/results-section'
+import { STAGES, STAGES_REAL } from '@/lib/stages'
 
 export default function Page() {
+  const [dataset, setDataset] = useState<'simulated' | 'real'>('simulated')
+  const stages = dataset === 'simulated' ? STAGES : STAGES_REAL
+
   return (
     <main>
-      <Hero />
+      <Hero dataset={dataset} onDatasetChange={setDataset} />
       <PhotoGrid />
-      <PipelineSection />
+      <PipelineSection stages={stages} />
       <ResultsSection />
       <footer className="px-[8vw] py-16 text-center text-sm leading-relaxed text-muted-foreground">
         Benchmarking 3D Reconstruction for Aerial Freeboard Mapping in Arctic Environments —

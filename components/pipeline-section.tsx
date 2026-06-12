@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { STAGES, type Stage } from '@/lib/stages'
+import { useState, useEffect } from 'react'
+import { type Stage } from '@/lib/stages'
 import { PointCloudViewer } from './point-cloud-viewer'
 
-export function PipelineSection() {
-  const [active, setActive] = useState<Stage>(STAGES[0])
+export function PipelineSection({ stages }: { stages: Stage[] }) {
+  const [active, setActive] = useState<Stage>(stages[0])
+
+  useEffect(() => {
+    setActive(stages[0])
+  }, [stages])
 
   return (
     <section className="px-[8vw] py-28">
@@ -27,7 +31,7 @@ export function PipelineSection() {
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[320px_1fr] lg:items-start">
         <div className="relative flex flex-col gap-2.5 lg:sticky lg:top-8">
           <div className="pointer-events-none absolute left-[35px] top-7 bottom-7 hidden w-px bg-line lg:block z-0" />
-          {STAGES.map((stage) => {
+          {stages.map((stage) => {
             const isActive = stage.key === active.key
             return (
               <button
