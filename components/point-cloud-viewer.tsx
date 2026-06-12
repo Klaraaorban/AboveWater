@@ -32,8 +32,8 @@ function loadObject(
         const material = new THREE.PointsMaterial({
           size: pointSize,
           sizeAttenuation: true,
-          vertexColors: hasColor,
-          color: hasColor ? 0xffffff : c,
+          vertexColors: hasColor && color === 'vertex',
+          color: hasColor && color === 'vertex' ? 0xffffff : c,
         })
         const points = new THREE.Points(mesh.geometry, material)
         points.applyMatrix4(mesh.matrixWorld)

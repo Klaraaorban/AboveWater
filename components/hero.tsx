@@ -31,7 +31,7 @@ export function Hero() {
       <div className="relative z-10 max-w-3xl">
         <div className="mb-5 flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.18em] text-ice">
           <span className="inline-block h-2 w-2 rounded-full bg-ice shadow-[0_0_12px_var(--ice)]" />
-          Bachelor&apos;s Thesis — Companion Site
+          Bachelor&apos;s Thesis
         </div>
         <h1 className="mb-6 font-heading text-4xl font-semibold leading-[1.08] tracking-tight text-balance sm:text-5xl lg:text-6xl">
           Mapping the <span className="text-ice">Arctic canopy</span> from above, one reconstruction
@@ -55,7 +55,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="absolute bottom-12 left-[8vw] z-10 flex items-center gap-3 font-mono text-[0.72rem] uppercase tracking-wide text-muted-foreground">
+      {/* <div className="absolute bottom-12 left-[8vw] z-10 flex items-center gap-3 font-mono text-[0.72rem] uppercase tracking-wide text-muted-foreground">
         <span>Scroll to explore</span>
         <span className="relative h-px w-10 overflow-hidden bg-muted-foreground/40">
           <span
@@ -63,7 +63,7 @@ export function Hero() {
             style={{ animation: 'travel 2.2s ease-in-out infinite' }}
           />
         </span>
-      </div>
+      </div> */}
     </section>
   )
 }

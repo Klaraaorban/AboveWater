@@ -30,7 +30,8 @@ export const STAGES: Stage[] = [
     ],
     type: 'glb',
     path: '/assets/scene.glb',
-    pointColor: '#bfe0ea',
+    // pointColor: '#bfe0ea',
+    pointColor: 'vertex',
     pointSize: 0.02,
   },
   {
