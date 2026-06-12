@@ -1,6 +1,6 @@
 'use client'
 
-const FRAMES = [
+const FRAMES_SIMULATED = [
   { src: '/assets/survey/frame_00030.jpg', tag: 'FRAME_00030' },
   { src: '/assets/survey/frame_00045.jpg', tag: 'FRAME_00045' },
   { src: '/assets/survey/frame_00050.jpg', tag: 'FRAME_00050' },
@@ -12,7 +12,21 @@ const FRAMES = [
   { src: '/assets/survey/frame_00124.jpg', tag: 'FRAME_00124' },
 ]
 
-export function PhotoGrid() {
+const FRAMES_REAL = [
+  { src: '/assets/real/frame_000011.png', tag: 'FRAME_000011' },
+  { src: '/assets/real/frame_000013.png', tag: 'FRAME_000013' },
+  { src: '/assets/real/frame_000014.png', tag: 'FRAME_000014' },
+  { src: '/assets/real/frame_000019.png', tag: 'FRAME_000019' },
+  { src: '/assets/real/frame_000025.png', tag: 'FRAME_000025' },
+  { src: '/assets/real/frame_000026.png', tag: 'FRAME_000026' },
+  { src: '/assets/real/frame_000038.png', tag: 'FRAME_000038' },
+  { src: '/assets/real/frame_000041.png', tag: 'FRAME_000041' },
+  { src: '/assets/real/frame_000042.png', tag: 'FRAME_000042' },
+]
+
+export function PhotoGrid({ dataset }: { dataset: 'simulated' | 'real' }) {
+  const frames = dataset === 'simulated' ? FRAMES_SIMULATED : FRAMES_REAL
+
   return (
     <section className="border-y border-line bg-panel px-[8vw] py-28">
       <div className="mb-12 max-w-2xl">
@@ -24,14 +38,14 @@ export function PhotoGrid() {
           What the UAV actually saw.
         </h2>
         <p className="leading-relaxed text-muted-foreground">
-          A sample of frames captured during the simulated multi-tiered orbital survey over the
-          pressure-ridge mesh. These RGB images are the only input the Structure-from-Motion and
-          Depth Anything V3 pipelines receive — no calibration, no depth, no GPS.
+          {dataset === 'simulated'
+            ? 'A sample of frames captured during the simulated multi-tiered orbital survey over the pressure-ridge mesh. These RGB images are the only input the Structure-from-Motion and Depth Anything V3 pipelines receive — no calibration, no depth, no GPS.'
+            : 'A sample of frames captured during the real UAV survey. These RGB images are the only input the Structure-from-Motion and Depth Anything V3 pipelines receive — no calibration, no depth, no GPS.'}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        {FRAMES.map((frame) => (
+        {frames.map((frame) => (
           <figure
             key={frame.tag}
             className="group relative aspect-[4/3] overflow-hidden rounded border border-line bg-background"

@@ -14,7 +14,7 @@ export default function Page() {
   return (
     <main>
       <Hero dataset={dataset} onDatasetChange={setDataset} />
-      <PhotoGrid />
+      <PhotoGrid dataset={dataset} />
       <PipelineSection stages={stages} />
       <ResultsSection />
       <footer className="px-[8vw] py-16 text-center text-sm leading-relaxed text-muted-foreground">
