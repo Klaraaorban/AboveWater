@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
@@ -10,71 +10,78 @@ import type { Stage } from '@/lib/stages'
 
 type LoadState = 'loading' | 'ready' | 'error'
 
-function CloudModel({
+function loadObject(
+  path: string,
+  type: 'obj' | 'glb',
+  color: string,
+  pointSize: number,
+  onDone: (g: THREE.Group) => void,
+  onFail: (e: unknown) => void
+): () => void {
+  let cancelled = false
+
+  const handle = (root: THREE.Object3D) => {
+    if (cancelled) return
+    const group = new THREE.Group()
+    const c = new THREE.Color(color)
+    root.updateMatrixWorld(true)
+    root.traverse((child) => {
+      const mesh = child as THREE.Mesh
+      if ((mesh as any).isMesh && mesh.geometry) {
+        const hasColor = !!mesh.geometry.attributes.color
+        const material = new THREE.PointsMaterial({
+          size: pointSize,
+          sizeAttenuation: true,
+          vertexColors: hasColor,
+          color: hasColor ? 0xffffff : c,
+        })
+        const points = new THREE.Points(mesh.geometry, material)
+        points.applyMatrix4(mesh.matrixWorld)
+        group.add(points)
+      }
+      const pts = child as THREE.Points
+      if ((pts as any).isPoints && pts.geometry) {
+        group.add(pts.clone())
+      }
+    })
+    if (group.children.length === 0 && root.children.length > 0) group.add(root)
+    if (!cancelled) onDone(group)
+  }
+
+  const fail = (e: unknown) => { if (!cancelled) onFail(e) }
+
+  if (type === 'obj') {
+    new OBJLoader().load(path, handle, undefined, fail)
+  } else {
+    new GLTFLoader().load(path, (gltf) => handle(gltf.scene), undefined, fail)
+  }
+
+  return () => { cancelled = true }
+}
+
+function SingleModel({
   stage,
   onState,
   resetSignal,
 }: {
-  stage: Stage
+  stage: Extract<Stage, { type: 'obj' | 'glb' }>
   onState: (s: LoadState) => void
   resetSignal: number
 }) {
   const { camera, controls } = useThree() as any
-  const [object, setObject] = useState<THREE.Object3D | null>(null)
+  const [object, setObject] = useState<THREE.Group | null>(null)
   const groupRef = useRef<THREE.Group>(null)
 
   useEffect(() => {
-    let cancelled = false
     onState('loading')
-
-    const handle = (root: THREE.Object3D) => {
-      if (cancelled) return
-      const group = new THREE.Group()
-      const color = new THREE.Color(stage.pointColor)
-
-      root.updateMatrixWorld(true)
-      root.traverse((child) => {
-        const mesh = child as THREE.Mesh
-        if ((mesh as any).isMesh && mesh.geometry) {
-          const hasColor = !!mesh.geometry.attributes.color
-          const material = new THREE.PointsMaterial({
-            size: stage.pointSize,
-            sizeAttenuation: true,
-            vertexColors: hasColor,
-            color: hasColor ? 0xffffff : color,
-          })
-          const points = new THREE.Points(mesh.geometry, material)
-          points.applyMatrix4(mesh.matrixWorld)
-          group.add(points)
-        }
-        const pts = child as THREE.Points
-        if ((pts as any).isPoints && pts.geometry) {
-          group.add(pts.clone())
-        }
-      })
-
-      if (group.children.length === 0 && root.children.length > 0) {
-        group.add(root)
-      }
-      setObject(group)
-      onState('ready')
-    }
-
-    const fail = (e: unknown) => {
-      if (cancelled) return
-      console.log('[v0] failed to load model:', stage.path, e)
-      onState('error')
-    }
-
-    if (stage.type === 'obj') {
-      new OBJLoader().load(stage.path, handle, undefined, fail)
-    } else {
-      new GLTFLoader().load(stage.path, (gltf) => handle(gltf.scene), undefined, fail)
-    }
-
-    return () => {
-      cancelled = true
-    }
+    return loadObject(
+      stage.path,
+      stage.type,
+      stage.pointColor,
+      stage.pointSize,
+      (g) => { setObject(g); onState('ready') },
+      (e) => { console.log('[viewer] load failed:', e); onState('error') }
+    )
   }, [stage, onState])
 
   useEffect(() => {
@@ -83,30 +90,96 @@ function CloudModel({
     const size = box.getSize(new THREE.Vector3())
     const center = box.getCenter(new THREE.Vector3())
     object.position.sub(center)
-
     const maxDim = Math.max(size.x, size.y, size.z) || 1
     const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180)
     const dist = maxDim / (2 * Math.tan(fov / 2))
-
     camera.position.set(dist * 0.9, dist * 0.7, dist * 0.9)
     camera.near = maxDim / 100
     camera.far = maxDim * 100
     camera.updateProjectionMatrix()
-    if (controls) {
-      controls.target.set(0, 0, 0)
-      controls.update()
-    }
+    if (controls) { controls.target.set(0, 0, 0); controls.update() }
   }, [object, camera, controls, resetSignal])
 
   if (!object) return null
   return <primitive ref={groupRef} object={object} />
 }
 
+function DualModel({
+  stage,
+  onState,
+  resetSignal,
+  showA,
+  showB,
+}: {
+  stage: Extract<Stage, { type: 'dual' }>
+  onState: (s: LoadState) => void
+  resetSignal: number
+  showA: boolean
+  showB: boolean
+}) {
+  const { camera, controls } = useThree() as any
+  const [objectA, setObjectA] = useState<THREE.Group | null>(null)
+  const [objectB, setObjectB] = useState<THREE.Group | null>(null)
+  const [loadedA, setLoadedA] = useState(false)
+  const [loadedB, setLoadedB] = useState(false)
+  const groupRef = useRef<THREE.Group>(null)
+
+  useEffect(() => {
+    setLoadedA(false)
+    setLoadedB(false)
+    onState('loading')
+    const cancelA = loadObject(stage.pathA, 'obj', stage.colorA, stage.pointSize,
+      (g) => { setObjectA(g); setLoadedA(true) },
+      (e) => { console.log('[viewer] loadA failed:', e); onState('error') }
+    )
+    const cancelB = loadObject(stage.pathB, 'obj', stage.colorB, stage.pointSize,
+      (g) => { setObjectB(g); setLoadedB(true) },
+      (e) => { console.log('[viewer] loadB failed:', e); onState('error') }
+    )
+    return () => { cancelA(); cancelB() }
+  }, [stage, onState])
+
+  useEffect(() => {
+    if (loadedA && loadedB) onState('ready')
+  }, [loadedA, loadedB, onState])
+
+  useEffect(() => {
+    if (!objectA || !objectB || !groupRef.current) return
+    const combined = new THREE.Group()
+    combined.add(objectA.clone())
+    combined.add(objectB.clone())
+    const box = new THREE.Box3().setFromObject(combined)
+    const size = box.getSize(new THREE.Vector3())
+    const center = box.getCenter(new THREE.Vector3())
+    objectA.position.sub(center)
+    objectB.position.sub(center)
+    const maxDim = Math.max(size.x, size.y, size.z) || 1
+    const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180)
+    const dist = maxDim / (2 * Math.tan(fov / 2))
+    camera.position.set(dist * 0.9, dist * 0.7, dist * 0.9)
+    camera.near = maxDim / 100
+    camera.far = maxDim * 100
+    camera.updateProjectionMatrix()
+    if (controls) { controls.target.set(0, 0, 0); controls.update() }
+  }, [objectA, objectB, camera, controls, resetSignal])
+
+  return (
+    <group ref={groupRef}>
+      {objectA && showA && <primitive object={objectA} />}
+      {objectB && showB && <primitive object={objectB} />}
+    </group>
+  )
+}
+
 export function PointCloudViewer({ stage }: { stage: Stage }) {
   const [state, setState] = useState<LoadState>('loading')
   const [resetSignal, setResetSignal] = useState(0)
   const [showAxes, setShowAxes] = useState(false)
+  const [showA, setShowA] = useState(true)
+  const [showB, setShowB] = useState(true)
 
+  const onState = useCallback((s: LoadState) => setState(s), [])
+  const isDual = stage.type === 'dual'
   const loadingLabel = useMemo(() => `Loading ${stage.key.toUpperCase()} data…`, [stage.key])
 
   return (
@@ -121,7 +194,21 @@ export function PointCloudViewer({ stage }: { stage: Stage }) {
         <directionalLight position={[5, 10, 7]} intensity={0.6} />
         {showAxes && <axesHelper args={[1]} />}
         <Suspense fallback={null}>
-          <CloudModel stage={stage} onState={setState} resetSignal={resetSignal} />
+          {isDual ? (
+            <DualModel
+              stage={stage as Extract<Stage, { type: 'dual' }>}
+              onState={onState}
+              resetSignal={resetSignal}
+              showA={showA}
+              showB={showB}
+            />
+          ) : (
+            <SingleModel
+              stage={stage as Extract<Stage, { type: 'obj' | 'glb' }>}
+              onState={onState}
+              resetSignal={resetSignal}
+            />
+          )}
         </Suspense>
         <OrbitControls enableDamping dampingFactor={0.08} makeDefault />
       </Canvas>
@@ -141,14 +228,40 @@ export function PointCloudViewer({ stage }: { stage: Stage }) {
               <span className="font-mono text-sm text-ice">FILE NOT FOUND</span>
               <span className="font-mono text-xs text-muted-foreground max-w-sm leading-relaxed">
                 Drop your model at{' '}
-                <span className="text-foreground">public{stage.path}</span> and it will render here.
+                <span className="text-foreground">public{(stage as any).path ?? (stage as any).pathA}</span> and it will render here.
               </span>
             </>
           )}
         </div>
       )}
 
-      <div className="absolute top-4 right-4 flex gap-2 z-10">
+      <div className="absolute top-4 right-4 flex gap-2 z-10 flex-wrap justify-end">
+        {isDual && (
+          <>
+            <button
+              onClick={() => setShowA((v) => !v)}
+              className="font-mono text-[0.7rem] px-3 py-1.5 rounded border transition-colors"
+              style={{
+                background: showA ? (stage as any).colorA + '22' : 'var(--panel)',
+                borderColor: showA ? (stage as any).colorA : 'var(--line)',
+                color: showA ? (stage as any).colorA : 'var(--foreground)',
+              }}
+            >
+              {(stage as any).labelA}
+            </button>
+            <button
+              onClick={() => setShowB((v) => !v)}
+              className="font-mono text-[0.7rem] px-3 py-1.5 rounded border transition-colors"
+              style={{
+                background: showB ? (stage as any).colorB + '22' : 'var(--panel)',
+                borderColor: showB ? (stage as any).colorB : 'var(--line)',
+                color: showB ? (stage as any).colorB : 'var(--foreground)',
+              }}
+            >
+              {(stage as any).labelB}
+            </button>
+          </>
+        )}
         <button
           onClick={() => setResetSignal((s) => s + 1)}
           className="font-mono text-[0.7rem] bg-panel border border-line text-foreground px-3 py-1.5 rounded transition-colors hover:border-ice hover:text-ice"

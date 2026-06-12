@@ -8,11 +8,12 @@ export type Stage = {
   title: string
   desc: string
   meta: { label: string; value: string }[]
-  type: 'obj' | 'glb'
-  path: string
-  pointColor: string
   pointSize: number
-}
+  pointColor: string
+} & (
+  | { type: 'glb' | 'obj'; path: string }
+  | { type: 'dual'; pathA: string; pathB: string; colorA: string; colorB: string; labelA: string; labelB: string }
+)
 
 export const STAGES: Stage[] = [
   {
@@ -46,7 +47,7 @@ export const STAGES: Stage[] = [
     ],
     type: 'obj',
     path: '/assets/lidar3.obj',
-    pointColor: '#eef3f7',
+    pointColor: '#ffff00',
     pointSize: 0.015,
   },
   {
@@ -63,7 +64,7 @@ export const STAGES: Stage[] = [
     ],
     type: 'obj',
     path: '/assets/optical3.obj',
-    pointColor: '#d08a6b',
+    pointColor: '#ff0000',
     pointSize: 0.02,
   },
   {
@@ -72,15 +73,20 @@ export const STAGES: Stage[] = [
     name: 'ICP Co-Registration',
     blurb: 'Cloud-to-cloud distance after alignment to LiDAR',
     title: 'ICP Co-Registration — Dataset B',
-    desc: 'DA3 reconstruction aligned to the LiDAR reference frame via Iterative Closest Point. When the OBJ carries vertex colors, the cloud-to-cloud distance coloring is preserved: cool tones indicate close alignment, warm tones indicate geometric deviation.',
+    desc: 'DA3 reconstruction aligned to the LiDAR reference frame via Iterative Closest Point. Both clouds are rendered overlaid in the same scene — cyan is SfM, yellow is LiDAR.',
     meta: [
       { label: 'ALGORITHM', value: 'ICP' },
       { label: 'METRIC', value: 'C2C DIST' },
       { label: 'RESULT', value: 'FIG. coreg' },
     ],
-    type: 'obj',
-    path: '/assets/optical3.obj',
-    pointColor: '#bfe0ea',
+    type: 'dual',
+    pathA: '/assets/optical3.obj',
+    pathB: '/assets/lidar3.obj',
+    colorA: '#00d4ff',
+    colorB: '#ffff00',
+    labelA: 'SfM',
+    labelB: 'LiDAR',
+    pointColor: '#00d4ff',
     pointSize: 0.02,
   },
 ]

@@ -2,7 +2,7 @@ export function Hero() {
   const stats = [
     { num: '2', label: 'Surface Datasets' },
     { num: '3', label: 'Reconstruction Methods' },
-    { num: '0.24m', label: 'Best RMSE (DA3)' },
+    { num: '0.2387m', label: 'Best RMSE (DA3)' },
     { num: '7', label: 'Evaluation Metrics' },
   ]
 
