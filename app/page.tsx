@@ -15,7 +15,7 @@ export default function Page() {
     <main>
       <Hero dataset={dataset} onDatasetChange={setDataset} />
       <PhotoGrid dataset={dataset} />
-      <PipelineSection stages={stages} />
+      <PipelineSection stages={stages} dataset={dataset} />
       <ResultsSection />
       <footer className="px-[8vw] py-16 text-center text-sm leading-relaxed text-muted-foreground">
         Benchmarking 3D Reconstruction for Aerial Freeboard Mapping in Arctic Environments —

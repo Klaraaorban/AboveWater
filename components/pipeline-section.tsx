@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { type Stage } from '@/lib/stages'
 import { PointCloudViewer } from './point-cloud-viewer'
 
-export function PipelineSection({ stages }: { stages: Stage[] }) {
+export function PipelineSection({ stages, dataset }: { stages: Stage[], dataset: 'simulated' | 'real' }) {
   const [active, setActive] = useState<Stage>(stages[0])
 
   useEffect(() => {
@@ -21,11 +21,11 @@ export function PipelineSection({ stages }: { stages: Stage[] }) {
         <h2 className="mb-4 font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl">
           From pixels to point clouds.
         </h2>
-        <p className="leading-relaxed text-muted-foreground">
-          Step through the pipeline stages for Dataset B, the AI-generated pressure-ridge mesh. Each
-          stage loads its corresponding 3D output — rotate, zoom, and pan to inspect the geometry
-          directly. DA3 estimates its own camera trajectory from the images alone.
-        </p>
+<p className="leading-relaxed text-muted-foreground">
+  {dataset === 'simulated'
+    ? 'Step through the pipeline stages for Dataset B, the AI-generated pressure-ridge mesh. Each stage loads its corresponding 3D output — rotate, zoom, and pan to inspect the geometry directly. DA3 estimates its own camera trajectory from the images alone.'
+    : 'Step through the pipeline stages for Dataset A, the real UAV survey over Arctic sea ice. Each stage loads its corresponding 3D output — rotate, zoom, and pan to inspect the geometry directly.'}
+</p>
       </div>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[320px_1fr] lg:items-start">
