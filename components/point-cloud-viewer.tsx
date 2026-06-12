@@ -79,19 +79,23 @@ function CloudModel({
 
   useEffect(() => {
     if (!object || !groupRef.current) return
+    
     const box = new THREE.Box3().setFromObject(object)
     const size = box.getSize(new THREE.Vector3())
     const center = box.getCenter(new THREE.Vector3())
-    object.position.sub(center)
+    
+    object.position.set(-center.x, -center.y, -center.z)
 
     const maxDim = Math.max(size.x, size.y, size.z) || 1
     const fov = (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180)
-    const dist = maxDim / (2 * Math.tan(fov / 2))
+    let dist = maxDim / (2 * Math.tan(fov / 2))
+    dist *= 2.5
 
-    camera.position.set(dist * 0.9, dist * 0.7, dist * 0.9)
-    camera.near = maxDim / 100
-    camera.far = maxDim * 100
+    camera.position.set(dist, dist * 0.8, dist)
+    camera.near = 0.001
+    camera.far = maxDim * 1000
     camera.updateProjectionMatrix()
+    
     if (controls) {
       controls.target.set(0, 0, 0)
       controls.update()
@@ -113,12 +117,12 @@ export function PointCloudViewer({ stage }: { stage: Stage }) {
     <div className="relative flex-1 min-h-[460px] max-lg:min-h-[340px] [background:radial-gradient(ellipse_at_center,oklch(0.86_0.045_230/0.07)_0%,transparent_70%),var(--background)]">
       <Canvas
         key={stage.key}
-        camera={{ fov: 45, near: 0.01, far: 1000, position: [2, 2, 2] }}
+        camera={{ fov: 45, near: 0.001, far: 10000, position: [10, 10, 10] }}
         dpr={[1, 2]}
       >
-        <ambientLight intensity={0.9} />
-        <directionalLight position={[5, 10, 7]} intensity={0.6} />
-        {showAxes && <axesHelper args={[1]} />}
+        <ambientLight intensity={1.2} />
+        <directionalLight position={[10, 20, 15]} intensity={0.8} />
+        {showAxes && <axesHelper args={[5]} />}
         <Suspense fallback={null}>
           <CloudModel stage={stage} onState={setState} resetSignal={resetSignal} />
         </Suspense>
