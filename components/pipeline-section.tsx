@@ -26,14 +26,14 @@ export function PipelineSection() {
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[320px_1fr] lg:items-start">
         <div className="relative flex flex-col gap-2.5 lg:sticky lg:top-8">
-          <div className="pointer-events-none absolute left-[35px] top-7 bottom-7 hidden w-px bg-line lg:block" />
+          <div className="pointer-events-none absolute left-[35px] top-7 bottom-7 hidden w-px bg-line lg:block z-0" />
           {STAGES.map((stage) => {
             const isActive = stage.key === active.key
             return (
               <button
                 key={stage.key}
                 onClick={() => setActive(stage)}
-                className={`flex w-full items-center gap-4 rounded-lg border px-5 py-4 text-left transition-all ${
+                className={`relative z-10 flex w-full items-center gap-4 rounded-lg border px-5 py-4 text-left transition-all ${
                   isActive
                     ? 'border-ice bg-panel-light shadow-[0_0_0_1px_var(--ice),0_8px_24px_-8px_oklch(0.86_0.045_230/0.25)]'
                     : 'border-line bg-panel hover:border-ice-dim hover:bg-panel-light'
