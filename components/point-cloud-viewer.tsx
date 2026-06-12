@@ -68,7 +68,7 @@ function CloudModel({
 
     if (stage.type === 'obj') {
       new OBJLoader().load(stage.path, handle, undefined, fail)
-    } else {
+    } else if (stage.type === 'glb') {
       new GLTFLoader().load(stage.path, (gltf) => handle(gltf.scene), undefined, fail)
     }
 
