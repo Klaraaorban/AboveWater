@@ -49,8 +49,7 @@ export function Hero({
         </h1>
         <p className="mb-9 max-w-xl leading-relaxed text-muted-foreground">
           A benchmark for vision-based 3D reconstruction of Arctic sea ice from UAV imagery —
-          comparing classical photogrammetry, monocular depth foundation models, and 3D Gaussian
-          Splatting against simulated LiDAR ground truth. Explore the pipeline below, dataset by
+          comparing classical photogrammetry and monocular depth foundation models against simulated LiDAR ground truth. Explore the pipeline below, dataset by
           dataset, reconstruction by reconstruction.
         </p>
         <div className="flex flex-wrap gap-10">
