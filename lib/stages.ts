@@ -83,11 +83,11 @@ export const STAGES: Stage[] = [
     type: 'dual',
     pathA: '/assets/optical3.obj',
     pathB: '/assets/lidar3.obj',
-    colorA: '#00d4ff',
+    colorA: '#ff0000',
     colorB: '#ffff00',
     labelA: 'SfM',
     labelB: 'LiDAR',
-    pointColor: '#00d4ff',
+    pointColor: '#ff0000',
     pointSize: 0.02,
   },
 ]

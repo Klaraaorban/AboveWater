@@ -42,11 +42,12 @@ function loadObject(
       const pts = child as THREE.Points
       if ((pts as any).isPoints && pts.geometry) {
         const clone = pts.clone()
+        const hasColor = !!pts.geometry.attributes.color
         clone.material = new THREE.PointsMaterial({
           size: pointSize,
           sizeAttenuation: true,
-          vertexColors: false,
-          color: c,
+          vertexColors: hasColor && color === 'vertex',
+          color: hasColor && color === 'vertex' ? 0xffffff : c,
         })
         group.add(clone)
       }
