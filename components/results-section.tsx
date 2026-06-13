@@ -116,7 +116,7 @@ export function ResultsSection() {
           03 — Quantitative Results
         </div>
         <h2 className="mb-4 font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-          Texture density decides everything.
+          Comparative Reconstruction Metrics
         </h2>
         <p className="leading-relaxed text-muted-foreground">
           Across both surface datasets, Depth Anything V3 consistently outperforms classical
